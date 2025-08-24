@@ -1,4 +1,5 @@
 import pandas as pd
+from pandas.api.types import is_integer_dtype
 import sqlite3
 
 last_year_record = 2023
@@ -7,6 +8,11 @@ df_traffic_accidents = pd.DataFrame()
 rename_columns = {
     "ID_ENTIDAD": "entidad_id",
     "ID_MUNICIPIO": "municipio_id",
+    "ANIO": "anio",
+    "MES": "mes",
+    "ID_DIA": "id_dia",
+    "ID_HORA": "id_hora",
+    "ID_MINUTO": "id_minuto",
     "TIPACCID": "tipo_accidente",
     "AUTOMOVIL": "automovil",
     "CAMPASAJ": "camioneta_pasajeros",
@@ -38,8 +44,60 @@ rename_columns = {
     "OTROMUERTO": "otro_muerto",
     "OTROHERIDO": "otro_herido",
     "NEMUERTO": "no_espec_muerto",
-    "NEHERIDO": "no_espec_herido"
+    "NEHERIDO": "no_espec_herido",
+    "URBANA": "urbana",
+    "SUBURBANA": "suburbana",
+
 }
+
+fix_rename_columns = {
+    'COBERTURA': 'entidad_id',
+    "ID_ENTIDAD": "municipio_id",
+    "ID_MUNICIPIO": "anio",
+    "ANIO": "mes",
+    "MES": "id_hora",
+    "ID_HORA": "id_minuto",
+    "ID_MINUTO": "id_dia",
+    "ID_DIA": "diasemana",
+    'DIASEMANA': 'urbana',
+    'URBANA': 'suburbana',
+    'SUBURBANA': 'tipo_accidente',
+    "TIPACCID": "automovil",
+    "AUTOMOVIL": "camioneta_pasajeros",
+    "CAMPASAJ": "microbus",
+    "MICROBUS": "camion_urbano",
+    "PASCAMION": "autobus",
+    "OMNIBUS": "tranvia",
+    "TRANVIA": "camioneta_carga",
+    "CAMIONETA": "camion_carga",
+    "CAMION": "tractor",
+    "TRACTOR": "ferrocarril",
+    "FERROCARRI": "motocicleta",
+    "MOTOCICLET": "bicicleta",
+    "BICICLETA": "otro_vehiculo",
+    "OTROVEHIC": "causa_accidente",
+    "CAUSAACCI": "superficie_rodamiento",
+    "CAPAROD": "sexo",
+    "SEXO": "aliento_alcoholico",
+    "ALIENTO": "cinturon",
+    "CINTURON": "edad",
+    "ID_EDAD": "conductor_muerto",
+    "CONDMUERTO":"conductor_herido",
+    "CONDHERIDO": "pasajero_muerto",
+    "PASAMUERTO": "pasajero_herido",
+    "PASAHERIDO": "peaton_muerto",
+    "PEATMUERTO": "peaton_herido",
+    "PEATHERIDO": "ciclista_muerto",
+    "CICLMUERTO": "ciclista_herido",
+    "CICLHERIDO": "otro_muerto",
+    "OTROMUERTO": "otro_herido",
+    "OTROHERIDO": "no_espec_muerto",
+    "NEMUERTO": "no_espec_herido",
+    "NEHERIDO": "no_espec_herido",
+    'CLASACC': 'estatus',
+    'ESTATUS':  'cobertura',
+}
+
 
 def get_dataset(year):
     return pd.read_csv("data/raw/atus_anual_csv/conjunto_de_datos/atus_anual_"+str(year)+".csv")
@@ -178,29 +236,35 @@ if __name__ == '__main__':
             df_traffic_accidents = get_dataset(year)
             print(f"Se encontro el Dataset del año: {year}.")
 
-            df_traffic_accidents["fecha_hora"] = pd.to_datetime(dict(
-                    year=df_traffic_accidents["ANIO"],
-                    month=df_traffic_accidents["MES"],
-                    day=df_traffic_accidents["ID_DIA"],
-                    hour=df_traffic_accidents["ID_HORA"],
-                    minute=df_traffic_accidents["ID_MINUTO"]
-                ), errors='coerce')
+            if is_integer_dtype(df_traffic_accidents['COBERTURA']):
+                new_columns = fix_rename_columns
+                df_traffic_accidents['ESTATUS'] = df_traffic_accidents['ESTATUS'].fillna(1)
+            else:
+                new_columns = rename_columns
 
-            df_traffic_accidents = df_traffic_accidents.dropna()
-            df_traffic_accidents = df_traffic_accidents.drop(["ANIO","MES","ID_DIA","ID_HORA","ID_MINUTO"],axis=1)
-
-            zones = pd.DataFrame()
-            zones["URBANA"] = df_traffic_accidents["URBANA"].replace("Sin accidente en esta zona", pd.NA)
-            zones["SUBURBANA"] = df_traffic_accidents["SUBURBANA"].replace("Sin accidente en esta zona", pd.NA)
-
-            df_traffic_accidents["zona"] = zones["URBANA"].combine_first(zones["SUBURBANA"])
-            df_traffic_accidents["zona"] = df_traffic_accidents["zona"].fillna('No especificado')
-
-            for original, new in rename_columns.items():
+            for original, new in new_columns.items():
                 if original in df_traffic_accidents.columns:
                     df_traffic_accidents.rename(columns={original: new}, inplace=True)
 
-            df_traffic_accidents = df_traffic_accidents.drop(['COBERTURA', 'DIASEMANA', 'CLASACC', 'ESTATUS'], axis=1)
+            df_traffic_accidents["fecha_hora"] = pd.to_datetime(dict(
+                    year=df_traffic_accidents["anio"],
+                    month=df_traffic_accidents["mes"],
+                    day=df_traffic_accidents["id_dia"],
+                    hour=df_traffic_accidents["id_hora"],
+                    minute=df_traffic_accidents["id_minuto"]
+                ), errors='coerce')
+
+            df_traffic_accidents = df_traffic_accidents.dropna()
+            df_traffic_accidents = df_traffic_accidents.drop(["anio","mes","id_dia","id_hora","id_minuto"],axis=1)
+
+            zones = pd.DataFrame()
+            zones["urbana"] = df_traffic_accidents["urbana"].replace("Sin accidente en esta zona", pd.NA)
+            zones["suburbana"] = df_traffic_accidents["suburbana"].replace("Sin accidente en esta zona", pd.NA)
+
+            df_traffic_accidents["zona"] = zones["urbana"].combine_first(zones["suburbana"])
+            df_traffic_accidents["zona"] = df_traffic_accidents["zona"].fillna('No especificado')
+
+           # df_traffic_accidents = df_traffic_accidents.drop(['COBERTURA', 'DIASEMANA', 'CLASACC', 'ESTATUS'], axis=1)
 
             print(f"El dataset tiene {len(df_traffic_accidents)} registros")
 
