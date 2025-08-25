@@ -266,7 +266,7 @@ if __name__ == '__main__':
 
            # df_traffic_accidents = df_traffic_accidents.drop(['COBERTURA', 'DIASEMANA', 'CLASACC', 'ESTATUS'], axis=1)
 
-            print(f"El dataset tiene {len(df_traffic_accidents)} registros")
+            print(f"El dataset tiene {len(df_traffic_accidents)} registros.")
 
             df_vehiculos = df_traffic_accidents[['automovil','camioneta_pasajeros', 'microbus', 'camion_urbano', 'autobus','tranvia', 'camioneta_carga', 
                                      'camion_carga', 'tractor', 'ferrocarril', 'motocicleta', 'bicicleta', 'otro_vehiculo']]
@@ -293,10 +293,31 @@ if __name__ == '__main__':
                 if original in df_accidentes.columns:
                     df_accidentes.rename(columns={original: new}, inplace=True)
 
-            df_vehiculos.to_sql("vehiculos",conn,if_exists="append",index=False)
-            df_muertos.to_sql("muertos",conn,if_exists="append",index=False)
-            df_heridos.to_sql("heridos",conn,if_exists="append",index=False)
-            df_accidentes.to_sql("accidentes",conn,if_exists="append",index=False)
+            if df_accidentes.shape[0] == df_vehiculos.shape[0] == df_heridos.shape[0] == df_muertos.shape[0]:
+                for col in ['vehiculos_id','heridos_id','muertos_id']:
+                    df_accidentes[col] = df_accidentes['id']
+
+                cursor.execute("SELECT COUNT(*) FROM accidentes;")
+                prev_records = cursor.fetchone()[0]
+
+                df_vehiculos.to_sql("vehiculos",conn,if_exists="append",index=False)
+                df_muertos.to_sql("muertos",conn,if_exists="append",index=False)
+                df_heridos.to_sql("heridos",conn,if_exists="append",index=False)
+                df_accidentes.to_sql("accidentes",conn,if_exists="append",index=False)
+
+                cursor.execute("SELECT COUNT(*) FROM accidentes;")
+                new_records = cursor.fetchone()[0]
+
+                print(f"Se cargaron {new_records-prev_records} registros.")
+
+            else:
+                print(f"Error en dataset del año {year}, no hay misma cantidad de filas.")
+                print(f'Tabla accidentes: {len(df_accidentes)}')
+                print(f'Tabla vehiculos: {len(df_vehiculos)}')
+                print(f'Tabla heridos: {len(df_heridos)}')
+                print(f'Tabla muertos: {len(df_muertos)}')
+
+            
 
         except FileNotFoundError:
             print(f"El Dataset del año: {year}, no existe.")
