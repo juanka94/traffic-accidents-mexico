@@ -157,3 +157,18 @@ Despite stable accident numbers, the **fatality rate has not decreased significa
 Collisions with **Vehiculo automotor, motocileta & peaton**  contribute to the vast majority of total fatalities, likely exceeding 70–80% of all recorded deaths.
 
 ![Fatality by Accident](/assets/img/Fatalities_by_Accident.png)
+
+---
+
+## 🧰 Tech Stack
+
+| Component | Technology |
+|----------|------------|
+| Language | Python 3.9.12 |
+| ETL | Pandas, NumPy |
+| Storage | SQLite |
+| Visualization | Matplotlib, Seaborn|
+| Version Control | Git + GitHub |
+
+---
+
