@@ -115,3 +115,45 @@ The database is normalized into a **star-schema-like structure** optimized for a
 ```
 
 ---
+
+## 📊 Analytical Highlights (2022–2023)
+
+### 📆 Accidents Over Time
+
+The total number of accidents has remained **relatively stable** over the past two years, with **a slight increase in 2023**.
+
+![Annual_Distribution](/assets/img/Annual_Distribution.png)
+
+![Time_analysis](/assets/img/Time_analysis.png)
+
+---
+
+### 🗺️ Geographic Distribution
+
+The **highest accident rates** occur consistently in:
+
+- **Nuevo Leon**
+- **Chihuahua**
+- **Sonora**
+
+The state of **Nuevo Leon** has an abnormal number of accidents compared to other states. *A further analysis is required*.
+
+![Geo_Analysis.png](/assets/img/Geo_Analysis.png)
+
+---
+
+### 🚗 Zones that are more likely to have accidents.
+
+- **Accidente en Intersección** remain the most frequent, accounting for nearly **76%** of incidents.
+
+![Accident Zones](/assets/img/Accidents_by_Zone.png)
+
+---
+
+### ☠️ Accidents with a higher fatality rate.
+
+Despite stable accident numbers, the **fatality rate has not decreased significantly**, indicating that **accident severity remains a critical challenge**.
+
+Collisions with **Vehiculo automotor, motocileta & peaton**  contribute to the vast majority of total fatalities, likely exceeding 70–80% of all recorded deaths.
+
+![Fatality by Accident](/assets/img/Fatalities_by_Accident.png)
